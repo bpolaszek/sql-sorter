@@ -57,7 +57,7 @@ final class MySqlJsonSorter
         foreach ($sorts as $path => $direction) {
             $column = sprintf('JSON_UNQUOTE(JSON_EXTRACT(data, "$.%s"))', $path);
             $castedColumn = sprintf('CAST(%s as %s)', $column, $this->mapCast($options['cast'][$path] ?? null));
-            $select = $select->orderBy(sprintf('%s %s', $castedColumn, $direction));
+            $select = $select->andOrderBy(sprintf('%s %s', $castedColumn, $direction));
         }
 
         $result = $this->connection->execute((string) $select, $select->getValues())->asList();
