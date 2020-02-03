@@ -46,13 +46,13 @@ final class MySqlJsonSorter
         $jsons = array_values(array_map(function ($item) {
             return ['data' => json_encode($item)];
         }, $data));
-        $insert = insert(...$jsons)->into($table, 'data');
+        $insert = insert(...$jsons)->into('`'.$table.'`', 'data');
 
         foreach ($insert->split($options['insert_buffer']) as $insertQuery) {
             $this->connection->execute((string) $insertQuery, $insertQuery->getValues());
         }
 
-        $select = select('JSON_EXTRACT(data, "$")')->from($table);
+        $select = select('JSON_EXTRACT(data, "$")')->from('`'.$table.'`');
 
         foreach ($sorts as $path => $direction) {
             $column = sprintf('JSON_UNQUOTE(JSON_EXTRACT(data, "$.%s"))', $path);
@@ -91,7 +91,7 @@ final class MySqlJsonSorter
     private function createTable(string $charset): string
     {
         $tableName = (string) Ulid::generate(true);
-        $this->connection->execute(sprintf('CREATE TEMPORARY TABLE %s (`data` JSON NOT NULL) COLLATE=%s', $tableName, $charset));
+        $this->connection->execute(sprintf('CREATE TEMPORARY TABLE `%s` (`data` JSON NOT NULL) COLLATE=%s', $tableName, $charset));
         return $tableName;
     }
 
